@@ -57,7 +57,6 @@ export default function AdminDashboard() {
 
   const fetchEvents = async () => {
     try {
-      // Assuming your public events route works for admins too, or use an admin-specific one
       const res = await axios.get('https://eventhub-ticket-booking.onrender.com/api/bookings/events', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -79,7 +78,7 @@ export default function AdminDashboard() {
       });
       alert('✅ Event and seats generated successfully!');
       setTitle(''); setDate(''); setLocation(''); setTicketPrice(''); setTotalSeats(60);
-      setEvents([...events, res.data.event || res.data]); // Update list immediately
+      setEvents([...events, res.data.event || res.data]); 
       fetchEvents();
     } catch (err) {
       alert(`Event Creation Failed: ${err.response?.data?.error || err.message}`);
@@ -115,8 +114,8 @@ export default function AdminDashboard() {
     try {
       const payload = {
         title: editForm.title,
-        date: editForm.date, // Added
-        location: editForm.location, // Added
+        date: editForm.date,
+        location: editForm.location,
         ticketPrice: Number(editForm.ticketPrice) * 100, 
         totalSeats: Number(editForm.totalSeats)
       };
@@ -168,11 +167,9 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* EVENTS TAB */}
       {activeTab === 'events' && (
         <div className="grid md:grid-cols-2 gap-8">
           
-          {/* CREATE EVENT FORM */}
           <div className="bg-slate-800/40 border border-slate-700 p-8 rounded-3xl h-fit">
             <div className="flex items-center gap-4 mb-6 text-emerald-400">
               <PlusCircle size={28} />
@@ -213,7 +210,6 @@ export default function AdminDashboard() {
             </form>
           </div>
 
-          {/* LIST OF EVENTS */}
           <div className="bg-slate-800/40 border border-slate-700 p-8 rounded-3xl">
             <div className="flex items-center gap-4 mb-6 text-blue-400">
               <List size={28} />
@@ -226,13 +222,21 @@ export default function AdminDashboard() {
                 <div key={event._id} className="bg-slate-900 border border-slate-700 p-5 rounded-2xl">
                   
                   {editingEventId === event._id ? (
-                    // EDIT MODE
+                    // EDIT MODE - NOW WITH DATE AND LOCATION!
                     <div className="flex flex-col gap-3">
                       <input type="text" value={editForm.title} onChange={(e) => setEditForm({...editForm, title: e.target.value})} className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white" placeholder="Event Title" />
+                      
+                      {/* THIS IS THE MISSING ROW FOR DATE AND LOCATION */}
+                      <div className="flex gap-2">
+                        <input type="datetime-local" value={editForm.date} onChange={(e) => setEditForm({...editForm, date: e.target.value})} className="w-1/2 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" />
+                        <input type="text" value={editForm.location} onChange={(e) => setEditForm({...editForm, location: e.target.value})} className="w-1/2 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm" placeholder="Location" />
+                      </div>
+
                       <div className="flex gap-2">
                         <input type="number" value={editForm.ticketPrice} onChange={(e) => setEditForm({...editForm, ticketPrice: e.target.value})} className="w-1/2 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white" placeholder="Price (₹)" />
                         <input type="number" value={editForm.totalSeats} onChange={(e) => setEditForm({...editForm, totalSeats: e.target.value})} className="w-1/2 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white" placeholder="Seats" />
                       </div>
+                      
                       <div className="flex gap-2 mt-2">
                         <button onClick={() => submitEdit(event._id)} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-slate-900 px-4 py-2 rounded-lg font-medium transition-colors w-full border border-emerald-500/30">Save</button>
                         <button onClick={() => setEditingEventId(null)} className="bg-slate-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-600 transition-colors w-full">Cancel</button>
@@ -242,12 +246,9 @@ export default function AdminDashboard() {
                     // VIEW MODE
                     <div>
                       <h3 className="font-bold text-lg text-white mb-1">{event.title}</h3>
-                      
-                      {/* NEWLY ADDED: Date and Location Display */}
                       <p className="text-sm text-slate-300 mb-1">
                         📍 {event.location || 'Location TBD'} &nbsp;|&nbsp; 🕒 {event.date ? new Date(event.date).toLocaleString() : 'Date TBD'}
                       </p>
-                      
                       <p className="text-sm text-slate-400 mb-4">Price: ₹{event.ticketPrice / 100} | Seats: {event.totalSeats}</p>
                       <div className="flex gap-2">
                         <button onClick={() => startEditing(event)} className="flex items-center justify-center gap-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg font-medium transition-colors border border-blue-500/20 w-full cursor-pointer">
@@ -268,7 +269,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* REFUNDS TAB */}
       {activeTab === 'refunds' && (
         <div className="bg-slate-800/40 border border-slate-700 p-8 rounded-3xl max-w-4xl">
           <div className="flex items-center gap-4 mb-6 text-amber-400">
