@@ -240,7 +240,6 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     // VIEW MODE
-                    // VIEW MODE
                     <div>
                       <h3 className="font-bold text-lg text-white mb-1">{event.title}</h3>
                       

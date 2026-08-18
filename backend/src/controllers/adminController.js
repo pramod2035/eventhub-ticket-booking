@@ -125,14 +125,14 @@ exports.deleteEvent = async (req, res) => {
 exports.updateEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const { title, ticketPrice, totalSeats } = req.body;
+    // ADDED date AND location HERE:
+    const { title, date, location, ticketPrice, totalSeats } = req.body;
 
     const event = await Event.findById(eventId);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    // Handle Seat Generation if Admin increases total capacity
     if (totalSeats && totalSeats > event.totalSeats) {
       const seatsToInsert = [];
       for (let i = event.totalSeats + 1; i <= totalSeats; i++) {
@@ -142,19 +142,17 @@ exports.updateEvent = async (req, res) => {
           status: 'AVAILABLE'
         });
       }
-      await Seat.insertMany(seatsToInsert); // Bulk generate the new seats
-    } 
-    // Prevent decreasing seats to avoid deleting someone's booked ticket
-    else if (totalSeats && totalSeats < event.totalSeats) {
+      await Seat.insertMany(seatsToInsert); 
+    } else if (totalSeats && totalSeats < event.totalSeats) {
       return res.status(400).json({ 
         message: 'Cannot decrease total seats dynamically. Please create a new event or contact database support.' 
       });
     }
 
-    // Update the event details
+    // ADDED date AND location HERE:
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId, 
-      { title, ticketPrice, totalSeats }, 
+      { title, date, location, ticketPrice, totalSeats }, 
       { new: true }
     );
 
