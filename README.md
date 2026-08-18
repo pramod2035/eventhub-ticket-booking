@@ -2,51 +2,54 @@
 
 A complete MERN stack application built to handle high-concurrency event ticket booking. It features real-time seat locking, a digital wallet system, and atomic database transactions to guarantee data integrity.
 
-## 🚀 Live Links
-* **Frontend (Vercel):** `[Link to be added after deployment]`
-* **Backend (Render):** `[Link to be added after deployment]`
-* **API Documentation:** `[Link to Postman Collection]`
+## 📋 Core Modules Implemented
 
-## 📋 Core Features Implemented
+1. **Authentication:** JWT-based signup/login with distinct `USER` and `ADMIN` role access.
+2. **Wallet System:** Users can add funds, and the system maintains a strict transaction ledger. A database-level constraint ensures a strictly **no negative balance** environment.
+3. **Event & Seat Booking:** Users can view seat matrices, reserve seats (locked for 5 minutes), and finalize bookings using wallet deductions.
+4. **History:** Dashboards for both Wallet Transactions and Event Bookings.
+5. **Admin Dashboard:** Full CRUD for events, bulk seat generation (S1-S60), global transaction/booking monitoring, and one-click atomic refund/cancellation processing.
 
-**User Module:**
-* JWT-based Registration & Authentication.
-* Wallet System (Add funds, view balance, transaction history).
-* Real-time seat matrix visualization.
-* 5-minute temporary seat reservation lock.
-* Ticket booking via wallet deduction.
-* Booking history dashboard.
+## 🛡️ Critical Requirements & Edge Case Handling
 
-**Admin Module:**
-* Secure Admin-only dashboard.
-* Event creation and bulk seat generation (S1-S60).
-* Global monitoring of all bookings and user transactions.
-* Atomic refund and cancellation processing.
+This system was architected specifically to handle the required concurrency and edge-case scenarios:
 
-## 🛠️ Tech Stack
-* **Frontend:** React.js, Vite, Tailwind CSS, Lucide Icons, Axios
+* **Parallel Booking Requests:** Handled via MongoDB document-level state checks. A seat transitions from `AVAILABLE` to `RESERVED` with a `lockedBy` user ID.
+* **Wallet Race Conditions:** Handled using atomic `$inc` operators within a MongoDB transaction.
+* **Expired Reservations During Payment:** The checkout controller strictly validates the `lockedUntil` timestamp against `Date.now()`. If a user attempts to pay after 5 minutes, the transaction is rejected and rolled back.
+* **Duplicate API Calls:** Handled via a custom Idempotency Middleware. The `/api/bookings/confirm` route requires an `Idempotency-Key` header to prevent double-charging a user who clicks "Pay" twice.
+* **Atomicity & Partial Failures:** Booking confirmation and wallet deduction are wrapped in a MongoDB Session (`session.startTransaction()`). They succeed or fail together.
+
+## 🛠️ Tech Stack & Design Decisions
+* **Frontend:** React.js, Vite, Tailwind CSS, React Router
 * **Backend:** Node.js, Express.js
 * **Database:** MongoDB Atlas (Mongoose)
+* **Currency Handling:** To prevent JavaScript floating-point arithmetic errors, all financial data is stored in integer format (paise) in the database and converted to rupees strictly for UI rendering.
 
-## 🏗️ Design Decisions & Architecture
+## 🌐 API Endpoints
 
-To address the critical requirements and edge cases of the assessment, the following architectural decisions were implemented:
+**Auth Endpoints**
+* `POST /api/auth/register` - Register a new user
+* `POST /api/auth/login` - Authenticate and receive JWT
 
-1. **Atomic Transactions (No Double Booking / Spending):** The core booking and refund logic utilizes MongoDB Sessions (`session.startTransaction()`). Deducting wallet funds, changing seat status, and generating booking/transaction logs happen as a single atomic unit. If any step fails (e.g., partial failure or network drop), the entire operation rolls back safely.
+**Wallet Endpoints** (Requires Token)
+* `POST /api/wallet/topup` - Add funds to wallet
+* `GET /api/wallet/balance` - Retrieve current wallet balance
 
-2. **Strict Wallet Constraints & Ledger:** To prevent catastrophic JavaScript floating-point errors, all financial data is stored in integer format (paise) and only converted to standard rupees on the frontend. The backend strictly enforces a "No negative balance" rule at the database schema level and logs every credit/debit into an immutable `Transaction` ledger.
+**Booking Endpoints** (Requires Token)
+* `GET /api/bookings/events` - Fetch all events and their details
+* `POST /api/bookings/reserve` - Lock a seat for 5 minutes
+* `POST /api/bookings/confirm` - Atomic checkout (Requires `Idempotency-Key` header)
 
-3. **Concurrency & Seat Expiry:**
-   When a user selects a seat, it transitions to a `RESERVED` state and locks for exactly 5 minutes using a timestamp (`lockedUntil`). The backend validates this timestamp at checkout. Expired seats are automatically treated as `AVAILABLE` by the query engine, requiring no external cron jobs or race conditions.
-
-4. **Idempotency (Retry-Safe APIs):**
-   A custom Idempotency Middleware was built for the checkout route. It utilizes an `Idempotency-Key` header and an expiring TTL index in MongoDB to ensure that if a user double-clicks the "Pay" button or experiences a laggy connection, they are never charged twice for the same transaction.
+**Admin Endpoints** (Requires Admin Token)
+* `POST /api/admin/events` - Create event and generate seat matrix
+* `POST /api/admin/refund/:bookingId` - Cancel booking, free seat, and refund wallet
 
 ## ⚙️ Local Setup Instructions
 
 ### Prerequisites
 * Node.js (v18+)
-* MongoDB Atlas Cluster URI
+* MongoDB Atlas Cluster URI (Must support replica sets for Transactions)
 
 ### 1. Backend Setup
 \`\`\`bash
@@ -75,5 +78,5 @@ npm run dev
 \`\`\`
 
 ## 📌 Assumptions
-* **Admin Provisioning:** It is assumed that Admin users are either seeded directly into the database or promoted manually by a DBA. The standard registration flow creates standard `USER` roles.
-* **Seat Matrix:** Events default to a standard 60-seat grid, generated sequentially (S1-S60) upon Event Creation via the Admin panel.
+* **Admin Provisioning:** Admin accounts are seeded directly into the database or updated manually by a DBA. The public registration flow defaults to the `USER` role.
+* **Seat Generation:** Events default to a standard 60-seat grid, generated sequentially upon Event Creation via the Admin panel.
