@@ -101,3 +101,40 @@ exports.processRefund = async (req, res) => {
     session.endSession();
   }
 };
+
+// DELETE EVENT HOTFIX
+exports.deleteEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    
+    // Wipe out the associated seats first
+    await Seat.deleteMany({ eventId });
+    
+    // Delete the event
+    const deletedEvent = await Event.findByIdAndDelete(eventId);
+    if (!deletedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    res.json({ message: 'Event and associated seats deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// UPDATE EVENT HOTFIX
+exports.updateEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    
+    // Update the event and return the new document
+    const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, { new: true });
+    if (!updatedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    res.json(updatedEvent);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
