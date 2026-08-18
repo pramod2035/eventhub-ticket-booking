@@ -3,7 +3,7 @@
 A full-stack ticket booking platform built with the MERN stack (MongoDB, Express.js, React.js, Node.js). It features role-based access control, dynamic seat generation, and a complete admin dashboard for event and refund management.
 
 ## 🔗 Live Links
-- **Frontend (Deployed on Vercel):** https://eventhub-ticket-booking-24gfl3ib2.vercel.app
+- **Frontend (Deployed on Vercel):** https://eventhub-ticket-booking-git-main-pramodnbhat2035-9891s-projects.vercel.app/
 - **Backend (Deployed on Render):** https://eventhub-ticket-booking.onrender.com
 
 ---
