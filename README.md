@@ -1,82 +1,74 @@
-# EventHub: Full-Stack Ticket Booking & Wallet System
+# EventHub - Ticket Booking Platform
 
-A complete MERN stack application built to handle high-concurrency event ticket booking. It features real-time seat locking, a digital wallet system, and atomic database transactions to guarantee data integrity.
+A full-stack ticket booking platform built with the MERN stack (MongoDB, Express.js, React.js, Node.js). It features role-based access control, dynamic seat generation, and a complete admin dashboard for event and refund management.
 
-## 📋 Core Modules Implemented
+## 🔗 Live Links
+- **Frontend (Deployed on Vercel):** https://eventhub-ticket-booking-24gfl3ib2.vercel.app
+- **Backend (Deployed on Render):** https://eventhub-ticket-booking.onrender.com
 
-1. **Authentication:** JWT-based signup/login with distinct `USER` and `ADMIN` role access.
-2. **Wallet System:** Users can add funds, and the system maintains a strict transaction ledger. A database-level constraint ensures a strictly **no negative balance** environment.
-3. **Event & Seat Booking:** Users can view seat matrices, reserve seats (locked for 5 minutes), and finalize bookings using wallet deductions.
-4. **History:** Dashboards for both Wallet Transactions and Event Bookings.
-5. **Admin Dashboard:** Full CRUD for events, bulk seat generation (S1-S60), global transaction/booking monitoring, and one-click atomic refund/cancellation processing.
+---
 
-## 🛡️ Critical Requirements & Edge Case Handling
-
-This system was architected specifically to handle the required concurrency and edge-case scenarios:
-
-* **Parallel Booking Requests:** Handled via MongoDB document-level state checks. A seat transitions from `AVAILABLE` to `RESERVED` with a `lockedBy` user ID.
-* **Wallet Race Conditions:** Handled using atomic `$inc` operators within a MongoDB transaction.
-* **Expired Reservations During Payment:** The checkout controller strictly validates the `lockedUntil` timestamp against `Date.now()`. If a user attempts to pay after 5 minutes, the transaction is rejected and rolled back.
-* **Duplicate API Calls:** Handled via a custom Idempotency Middleware. The `/api/bookings/confirm` route requires an `Idempotency-Key` header to prevent double-charging a user who clicks "Pay" twice.
-* **Atomicity & Partial Failures:** Booking confirmation and wallet deduction are wrapped in a MongoDB Session (`session.startTransaction()`). They succeed or fail together.
-
-## 🛠️ Tech Stack & Design Decisions
-* **Frontend:** React.js, Vite, Tailwind CSS, React Router
-* **Backend:** Node.js, Express.js
-* **Database:** MongoDB Atlas (Mongoose)
-* **Currency Handling:** To prevent JavaScript floating-point arithmetic errors, all financial data is stored in integer format (paise) in the database and converted to rupees strictly for UI rendering.
-
-## 🌐 API Endpoints
-
-**Auth Endpoints**
-* `POST /api/auth/register` - Register a new user
-* `POST /api/auth/login` - Authenticate and receive JWT
-
-**Wallet Endpoints** (Requires Token)
-* `POST /api/wallet/topup` - Add funds to wallet
-* `GET /api/wallet/balance` - Retrieve current wallet balance
-
-**Booking Endpoints** (Requires Token)
-* `GET /api/bookings/events` - Fetch all events and their details
-* `POST /api/bookings/reserve` - Lock a seat for 5 minutes
-* `POST /api/bookings/confirm` - Atomic checkout (Requires `Idempotency-Key` header)
-
-**Admin Endpoints** (Requires Admin Token)
-* `POST /api/admin/events` - Create event and generate seat matrix
-* `POST /api/admin/refund/:bookingId` - Cancel booking, free seat, and refund wallet
-
-## ⚙️ Local Setup Instructions
+## 🛠️ Setup Instructions
 
 ### Prerequisites
-* Node.js (v18+)
-* MongoDB Atlas Cluster URI (Must support replica sets for Transactions)
+- Node.js installed
+- MongoDB installed locally or a MongoDB Atlas URI
 
-### 1. Backend Setup
+### 1. Clone the repository
+\`\`\`bash
+git clone https://github.com/pramod2035/eventhub-ticket-booking.git
+cd eventhub-ticket-booking
+\`\`\`
+
+### 2. Backend Setup
 \`\`\`bash
 cd backend
 npm install
 \`\`\`
-Create a `.env` file in the `backend` directory:
+Create a `.env` file in the `backend` directory with the following variables:
 \`\`\`env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secure_random_string
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
 \`\`\`
-Start the server:
+Start the backend server:
 \`\`\`bash
-npm run dev
+npm start
 \`\`\`
 
-### 2. Frontend Setup
+### 3. Frontend Setup
+Open a new terminal window:
 \`\`\`bash
 cd frontend
 npm install
 \`\`\`
-Start the Vite development server:
+Create a `.env` file in the `frontend` directory:
+\`\`\`env
+VITE_API_URL=http://localhost:5000
+\`\`\`
+Start the frontend application:
 \`\`\`bash
 npm run dev
 \`\`\`
 
-## 📌 Assumptions
-* **Admin Provisioning:** Admin accounts are seeded directly into the database or updated manually by a DBA. The public registration flow defaults to the `USER` role.
-* **Seat Generation:** Events default to a standard 60-seat grid, generated sequentially upon Event Creation via the Admin panel.
+---
+
+## 🏗️ Design Decisions
+
+1. **Pre-Generated Seat Documents:** Instead of just keeping a tally of "available seats", the backend dynamically generates individual seat documents in the database when an admin creates or updates an event. This prevents race conditions (double-booking) and allows exact seat tracking.
+2. **Role-Based Authentication (JWT):** Implemented distinct `ADMIN` and `USER` roles. Middleware protects admin-specific routes (like creating events and processing refunds) from unauthorized access.
+3. **Tailwind CSS for UI:** Chose Tailwind for the frontend to maintain a clean, responsive, and modern design architecture without the overhead of heavy component libraries.
+4. **Simulated Wallet System:** To keep the focus on core logic rather than third-party payment gateway integration, refunds dynamically increment a user's simulated wallet balance.
+
+---
+
+## 🤔 Assumptions Made
+
+1. **Admin Creation:** It is assumed that Admin users are either seeded directly into the database or upgraded manually by a super-admin. Standard registration defaults to the `USER` role.
+2. **Seat Layout:** It is assumed that the event space is a general layout. Seats are generated sequentially (e.g., S1, S2, S3) rather than grouped by specific rows or VIP tiers.
+3. **Refund Policy:** It is assumed that admins have the ultimate authority to process refunds, and that cancelled tickets immediately free up the associated seat for another user to book.
+
+---
+
+## 📬 API Documentation
+A complete Postman Collection is included in the root directory (`EventHub_Postman_Collection.json`). You can import this directly into Postman to test all Admin, Auth, and Booking routes.
