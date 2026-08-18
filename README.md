@@ -31,6 +31,13 @@ PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_key
 \`\`\`
+
+**Seed the Database (Creates default Admin & User accounts for testing):**
+\`\`\`bash
+node src/seed.js
+\`\`\`
+*(Note: If your seed file is in the root of the backend folder, just run `node seed.js`)*
+
 Start the backend server:
 \`\`\`bash
 npm start
@@ -64,11 +71,11 @@ npm run dev
 
 ## 🤔 Assumptions Made
 
-1. **Admin Creation:** It is assumed that Admin users are either seeded directly into the database or upgraded manually by a super-admin. Standard registration defaults to the `USER` role.
+1. **Admin Creation:** It is assumed that Admin users are either seeded directly into the database (using the provided `seed.js` script) or upgraded manually by a super-admin. Standard registration defaults to the `USER` role.
 2. **Seat Layout:** It is assumed that the event space is a general layout. Seats are generated sequentially (e.g., S1, S2, S3) rather than grouped by specific rows or VIP tiers.
 3. **Refund Policy:** It is assumed that admins have the ultimate authority to process refunds, and that cancelled tickets immediately free up the associated seat for another user to book.
 
 ---
 
 ## 📬 API Documentation
-A complete Postman Collection is included in the root directory (`EventHub_Postman_Collection.json`). You can import this directly into Postman to test all Admin, Auth, and Booking routes.
+A complete Postman Collection is included in the root directory (`EventHub_Postman_Collection.json`). You can import this directly into Postman to test all Admin, Auth, and Booking routes locally or against the live deployment.
