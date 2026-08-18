@@ -20,8 +20,7 @@ export default function AdminDashboard() {
   
   // Edit State
   const [editingEventId, setEditingEventId] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', ticketPrice: '', totalSeats: '' });
-
+  const [editForm, setEditForm] = useState({ title: '', date: '', location: '', ticketPrice: '', totalSeats: '' });
   const { token, user } = useContext(AuthContext); 
   const navigate = useNavigate();
 
@@ -105,6 +104,8 @@ export default function AdminDashboard() {
     setEditingEventId(event._id);
     setEditForm({
       title: event.title,
+      date: event.date ? new Date(event.date).toISOString().slice(0, 16) : '',
+      location: event.location || '',
       ticketPrice: event.ticketPrice / 100, 
       totalSeats: event.totalSeats
     });
@@ -114,6 +115,8 @@ export default function AdminDashboard() {
     try {
       const payload = {
         title: editForm.title,
+        date: editForm.date, // Added
+        location: editForm.location, // Added
         ticketPrice: Number(editForm.ticketPrice) * 100, 
         totalSeats: Number(editForm.totalSeats)
       };
@@ -237,8 +240,15 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     // VIEW MODE
+                    // VIEW MODE
                     <div>
                       <h3 className="font-bold text-lg text-white mb-1">{event.title}</h3>
+                      
+                      {/* NEWLY ADDED: Date and Location Display */}
+                      <p className="text-sm text-slate-300 mb-1">
+                        📍 {event.location || 'Location TBD'} &nbsp;|&nbsp; 🕒 {event.date ? new Date(event.date).toLocaleString() : 'Date TBD'}
+                      </p>
+                      
                       <p className="text-sm text-slate-400 mb-4">Price: ₹{event.ticketPrice / 100} | Seats: {event.totalSeats}</p>
                       <div className="flex gap-2">
                         <button onClick={() => startEditing(event)} className="flex items-center justify-center gap-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg font-medium transition-colors border border-blue-500/20 w-full cursor-pointer">
