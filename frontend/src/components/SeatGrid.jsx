@@ -8,7 +8,7 @@ export default function SeatGrid({ eventId, onSeatSelected, token }) {
 
   const fetchSeats = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/bookings/seats/${eventId}`);
+      const res = await axios.get(`https://eventhub-ticket-booking.onrender.com/api/bookings/seats/${eventId}`);
       setSeats(res.data);
     } catch (err) {
       console.error('Failed to fetch seats:', err);
@@ -29,7 +29,7 @@ export default function SeatGrid({ eventId, onSeatSelected, token }) {
     try {
       // Calls the backend to securely lock the seat for 5 minutes
       const res = await axios.post(
-        'http://localhost:5000/api/bookings/reserve',
+        'https://eventhub-ticket-booking.onrender.com/api/bookings/reserve',
         { seatId: seat._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );

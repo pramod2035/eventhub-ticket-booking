@@ -25,7 +25,7 @@ export default function Login() {
     try {
       if (isLogin) {
         // Handle Login Route
-        const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+        const res = await axios.post('https://eventhub-ticket-booking.onrender.com/api/auth/login', { email, password });
         login(res.data.user, res.data.token);
         
         if (res.data.user.role === 'ADMIN') {
@@ -35,7 +35,7 @@ export default function Login() {
         }
       } else {
         // Handle Registration Route
-        await axios.post('http://localhost:5000/api/auth/register', { 
+        await axios.post('https://eventhub-ticket-booking.onrender.com/api/auth/register', { 
           name, 
           email, 
           password, 

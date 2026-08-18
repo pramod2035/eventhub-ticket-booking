@@ -20,14 +20,14 @@ export default function BookingPage() {
     const fetchData = async () => {
       try {
         // Fetch all events (since we don't have a single event endpoint, we filter it here)
-        const eventRes = await axios.get('http://localhost:5000/api/bookings/events', {
+        const eventRes = await axios.get('https://eventhub-ticket-booking.onrender.com/api/bookings/events', {
           headers: { Authorization: `Bearer ${token}` }
         });
         const currentEvent = eventRes.data.find(e => e._id === eventId);
         setEvent(currentEvent);
 
         // Fetch Seats for this event
-        const seatRes = await axios.get(`http://localhost:5000/api/bookings/seats/${eventId}`, {
+        const seatRes = await axios.get(`https://eventhub-ticket-booking.onrender.com/api/bookings/seats/${eventId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSeats(seatRes.data);
@@ -53,7 +53,7 @@ export default function BookingPage() {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/bookings/reserve', 
+      const res = await axios.post('https://eventhub-ticket-booking.onrender.com/api/bookings/reserve', 
         { seatId: seat._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -76,7 +76,7 @@ export default function BookingPage() {
       // Generate a random string for the Idempotency-Key header to prevent double charges
       const idempotencyKey = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-      await axios.post('http://localhost:5000/api/bookings/confirm',
+      await axios.post('https://eventhub-ticket-booking.onrender.com/api/bookings/confirm',
         { seatId: selectedSeat._id },
         { 
           headers: { 

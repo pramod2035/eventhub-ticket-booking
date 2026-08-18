@@ -39,7 +39,7 @@ export default function AdminDashboard() {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/bookings', {
+      const res = await axios.get('https://eventhub-ticket-booking.onrender.com/api/admin/bookings', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBookings(res.data);
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/admin/events', {
+      await axios.post('https://eventhub-ticket-booking.onrender.com/api/admin/events', {
         title, date, location, ticketPrice: parseInt(ticketPrice) * 100, totalSeats: parseInt(totalSeats)
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to refund and cancel this booking?")) return;
     
     try {
-      await axios.post(`http://localhost:5000/api/admin/refund/${bookingId}`, {}, {
+      await axios.post(`https://eventhub-ticket-booking.onrender.com/api/admin/refund/${bookingId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('✅ Refund processed successfully!');

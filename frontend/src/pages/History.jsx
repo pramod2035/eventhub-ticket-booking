@@ -10,7 +10,7 @@ export default function History() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/bookings/history', {
+        const res = await axios.get('https://eventhub-ticket-booking.onrender.com/api/bookings/history', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setBookings(res.data);

@@ -11,11 +11,11 @@ export default function Wallet() {
 
   const fetchWalletData = async () => {
     try {
-      const balRes = await axios.get('http://localhost:5000/api/wallet/balance');
+      const balRes = await axios.get('https://eventhub-ticket-booking.onrender.com/api/wallet/balance');
       setBalance(balRes.data.balance);
       
       // Assume you created a route for history in walletRoutes.js
-      const histRes = await axios.get('http://localhost:5000/api/wallet/history');
+      const histRes = await axios.get('https://eventhub-ticket-booking.onrender.com/api/wallet/history');
       setHistory(histRes.data);
     } catch (err) {
       console.error(err);
@@ -30,7 +30,7 @@ export default function Wallet() {
     e.preventDefault();
     try {
       // Send as paise/cents
-      await axios.post('http://localhost:5000/api/wallet/topup', { 
+      await axios.post('https://eventhub-ticket-booking.onrender.com/api/wallet/topup', { 
         amount: parseInt(amountToAdd) * 100 
       });
       setAmountToAdd('');

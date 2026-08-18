@@ -16,13 +16,13 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         // Fetch real events only. No dummy data fallback!
-        const eventRes = await axios.get('http://localhost:5000/api/bookings/events', {
+        const eventRes = await axios.get('https://eventhub-ticket-booking.onrender.com/api/bookings/events', {
            headers: { Authorization: `Bearer ${token}` }
         });
         setEvents(eventRes.data);
 
         // Fetch actual wallet balance
-        const walletRes = await axios.get('http://localhost:5000/api/wallet/balance', {
+        const walletRes = await axios.get('https://eventhub-ticket-booking.onrender.com/api/wallet/balance', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setWallet(walletRes.data.balance);

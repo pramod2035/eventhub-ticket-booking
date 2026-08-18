@@ -13,7 +13,7 @@ export default function WalletDashboard() {
     if (!amount || amount <= 0) return alert("Enter a valid amount");
 
     try {
-      const res = await axios.post('http://localhost:5000/api/wallet/topup', {
+      const res = await axios.post('https://eventhub-ticket-booking.onrender.com/api/wallet/topup', {
         amount: parseInt(amount) * 100 // Convert to paise
       }, {
         headers: { Authorization: `Bearer ${token}` }
