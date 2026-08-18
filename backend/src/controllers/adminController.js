@@ -122,17 +122,42 @@ exports.deleteEvent = async (req, res) => {
   }
 };
 
-// UPDATE EVENT HOTFIX
 exports.updateEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
-    
-    // Update the event and return the new document
-    const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, { new: true });
-    if (!updatedEvent) {
+    const { title, ticketPrice, totalSeats } = req.body;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
-    
+
+    // Handle Seat Generation if Admin increases total capacity
+    if (totalSeats && totalSeats > event.totalSeats) {
+      const seatsToInsert = [];
+      for (let i = event.totalSeats + 1; i <= totalSeats; i++) {
+        seatsToInsert.push({
+          eventId: event._id,
+          seatNumber: `S${i}`,
+          status: 'AVAILABLE'
+        });
+      }
+      await Seat.insertMany(seatsToInsert); // Bulk generate the new seats
+    } 
+    // Prevent decreasing seats to avoid deleting someone's booked ticket
+    else if (totalSeats && totalSeats < event.totalSeats) {
+      return res.status(400).json({ 
+        message: 'Cannot decrease total seats dynamically. Please create a new event or contact database support.' 
+      });
+    }
+
+    // Update the event details
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId, 
+      { title, ticketPrice, totalSeats }, 
+      { new: true }
+    );
+
     res.json(updatedEvent);
   } catch (err) {
     res.status(500).json({ error: err.message });
